@@ -234,7 +234,7 @@
 </div>
 
 <script>
-var offer='https://tone.affomelody.com/click?pid=20175&offer_id=591&sub1=testpush';
+var offer='https://tone.affomelody.com/click?pid=20175&offer_id=591&sub1='+(encodeURIComponent(new URLSearchParams(window.location.search).get('sub'))||'testpush');
 function goOffer(){window.location.href=offer}
 
 function next(n){
