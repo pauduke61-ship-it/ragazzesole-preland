@@ -2,113 +2,280 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Incontri nella tua zona</title>
 <style>
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:#0f0f1a;color:#fff;min-height:100vh;overflow-x:hidden}
-  
-  .gate{position:fixed;inset:0;background:rgba(0,0,0,.94);z-index:100;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px}
-  .gate-box{max-width:340px}
-  .gate h2{color:#ff4d6d;font-size:22px;margin-bottom:12px}
-  .gate p{color:#aaa;font-size:14px;margin-bottom:20px}
-  .gate-btn{display:block;width:100%;padding:16px;background:#ff4d6d;color:#fff;border:none;border-radius:8px;font-size:18px;font-weight:bold;cursor:pointer;margin-bottom:8px}
-  .gate-leave{color:#666;background:transparent;font-size:13px;cursor:pointer;border:none;text-decoration:underline}
-  
-  .header{background:linear-gradient(135deg,#ff4d6d 0%,#c2185b 100%);padding:14px 16px;text-align:center;position:sticky;top:0;z-index:10}
-  .header h1{font-size:18px;font-weight:bold}
-  .header .live{display:inline-flex;align-items:center;gap:6px;margin-top:4px;font-size:12px;color:rgba(255,255,255,.9)}
-  .dot{width:8px;height:8px;background:#4ade80;border-radius:50%;animation:pulse 1.5s infinite}
+  :root{--bg:#0a0a14;--card:#16162a;--line:#2a2a3e;--pink:#ff2d6d;--purple:#a855f7;--green:#22c55e;--muted:#888}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:var(--bg);color:#fff;min-height:100vh;overflow-x:hidden}
+
+  .step{display:none;min-height:100vh;animation:fade .5s}
+  .step.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+  .s1{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px;min-height:100vh}
+  .s1 .logo{font-size:40px;margin-bottom:20px;animation:pulse2 2s infinite}
+  @keyframes pulse2{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+  .s1 h1{font-size:26px;margin-bottom:12px;background:linear-gradient(135deg,var(--pink),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .s1 p{color:var(--muted);font-size:15px;margin-bottom:24px;max-width:340px}
+  .s1 .warning{background:rgba(255,45,109,.1);border:1px solid rgba(255,45,109,.3);padding:12px 16px;border-radius:8px;margin-bottom:20px;font-size:13px;color:#ffb3c8;max-width:340px}
+  .btn{display:block;width:100%;max-width:340px;padding:18px;background:linear-gradient(135deg,var(--pink),var(--purple));color:#fff;border:none;border-radius:12px;font-size:18px;font-weight:bold;cursor:pointer;box-shadow:0 6px 24px rgba(255,45,109,.4);transition:transform .15s}
+  .btn:active{transform:scale(0.97)}
+  .btn-ghost{background:transparent;color:var(--muted);font-size:13px;margin-top:12px;border:none;cursor:pointer;text-decoration:underline}
+
+  .s2{padding:24px 20px;max-width:480px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;justify-content:center}
+  .s2 h2{font-size:22px;margin-bottom:8px;text-align:center}
+  .s2 .sub{color:var(--muted);font-size:14px;text-align:center;margin-bottom:24px}
+  .loc-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:12px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .2s}
+  .loc-card:active{transform:scale(0.98)}
+  .loc-card.detected{border-color:var(--green);box-shadow:0 0 0 1px var(--green)}
+  .loc-ic{font-size:24px}
+  .loc-info{flex:1}
+  .loc-name{font-size:16px;font-weight:bold}
+  .loc-meta{font-size:12px;color:var(--muted);margin-top:2px}
+  .loc-badge{background:var(--green);color:#000;font-size:10px;padding:3px 8px;border-radius:10px;font-weight:bold}
+
+  .s3{padding:24px 20px;max-width:480px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;justify-content:center}
+  .s3 h2{font-size:22px;margin-bottom:24px;text-align:center}
+  .pref-row{margin-bottom:20px}
+  .pref-label{font-size:14px;color:var(--muted);margin-bottom:10px}
+  .pref-opts{display:flex;gap:8px;flex-wrap:wrap}
+  .pref-opt{flex:1;min-width:80px;padding:14px 8px;background:var(--card);border:1px solid var(--line);border-radius:10px;text-align:center;cursor:pointer;font-size:14px;transition:all .15s}
+  .pref-opt.sel{border-color:var(--pink);background:rgba(255,45,109,.15);color:var(--pink);font-weight:bold}
+
+  .s4{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:100vh;padding:30px}
+  .loader{width:80px;height:80px;border:4px solid var(--line);border-top-color:var(--pink);border-radius:50%;animation:spin 1s linear infinite;margin-bottom:24px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .s4 h2{font-size:22px;margin-bottom:8px}
+  .s4 .status{color:var(--muted);font-size:14px;min-height:20px}
+  .progress{width:240px;height:6px;background:var(--card);border-radius:3px;margin-top:20px;overflow:hidden}
+  .progress-bar{height:100%;background:linear-gradient(90deg,var(--pink),var(--purple));width:0%;transition:width .5s}
+
+  .header{background:linear-gradient(135deg,var(--pink),var(--purple));padding:14px 16px;text-align:center;position:sticky;top:0;z-index:10}
+  .header h1{font-size:17px;font-weight:bold}
+  .header .live{display:inline-flex;align-items:center;gap:6px;margin-top:4px;font-size:12px;color:rgba(255,255,255,.95)}
+  .dot{width:8px;height:8px;background:var(--green);border-radius:50%;animation:pulse 1.5s infinite;box-shadow:0 0 8px var(--green)}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-  
-  .ticker{background:#16162a;padding:10px 16px;font-size:12px;color:#666;text-align:center;border-bottom:1px solid #2a2a3e}
-  .ticker b{color:#4ade80}
-  
-  .counter{text-align:center;padding:14px;background:#1a1a2e;font-size:13px;color:#aaa;border-bottom:1px solid #2a2a3e}
-  .counter b{color:#4ade80;font-size:18px}
-  
+
+  .counter{text-align:center;padding:12px;background:var(--card);font-size:13px;color:var(--muted);border-bottom:1px solid var(--line)}
+  .counter b{color:var(--green);font-size:16px}
+
   .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:12px;max-width:520px;margin:0 auto}
-  .card{background:#1a1a2e;border-radius:12px;overflow:hidden;position:relative;cursor:pointer;transition:transform .15s}
+  .card{background:var(--card);border-radius:12px;overflow:hidden;position:relative;cursor:pointer;transition:transform .15s}
   .card:active{transform:scale(0.97)}
-  .card img{width:100%;height:200px;object-fit:cover;display:block;background:#2a2a3e}
+  .card .ph{width:100%;height:200px;object-fit:cover;display:block;background:var(--line);filter:blur(8px);transition:filter .3s}
+  .card.unlocked .ph{filter:blur(0)}
+  .card .lock{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:32px;color:#fff;background:rgba(0,0,0,.3);pointer-events:none}
+  .card.unlocked .lock{display:none}
   .card .info{padding:8px 10px}
   .card .name{font-size:14px;font-weight:bold}
-  .card .meta{font-size:11px;color:#888;margin-top:2px}
-  .card .online{position:absolute;top:8px;right:8px;width:11px;height:11px;background:#4ade80;border-radius:50%;border:2px solid #1a1a2e;box-shadow:0 0 8px #4ade80}
-  .card .msg{position:absolute;bottom:48px;left:8px;background:rgba(255,77,109,.95);color:#fff;font-size:10px;padding:3px 8px;border-radius:10px;animation:bounce 2s infinite;font-weight:bold}
+  .card .meta{font-size:11px;color:var(--muted);margin-top:2px}
+  .card .online{position:absolute;top:8px;right:8px;width:11px;height:11px;background:var(--green);border-radius:50%;border:2px solid var(--card);box-shadow:0 0 8px var(--green);z-index:2}
+  .card .msg{position:absolute;bottom:48px;left:8px;background:rgba(255,45,109,.95);color:#fff;font-size:10px;padding:3px 8px;border-radius:10px;font-weight:bold;animation:bounce 2s infinite;z-index:2}
   @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
-  .card .dist{position:absolute;top:8px;left:8px;background:rgba(0,0,0,.65);color:#fff;font-size:10px;padding:3px 6px;border-radius:4px}
-  
-  .cta-wrap{padding:20px 16px 30px;text-align:center;max-width:520px;margin:0 auto}
-  .cta{display:block;width:100%;padding:18px;background:linear-gradient(135deg,#ff4d6d 0%,#c2185b 100%);color:#fff;text-decoration:none;border-radius:12px;font-size:20px;font-weight:bold;box-shadow:0 6px 20px rgba(255,77,109,.5);border:none;cursor:pointer;animation:glow 2s infinite}
-  @keyframes glow{0%,100%{box-shadow:0 6px 20px rgba(255,77,109,.5)}50%{box-shadow:0 6px 32px rgba(255,77,109,.85)}}
-  .cta-sub{color:#888;font-size:13px;margin-top:10px}
-  .cta-sub b{color:#ff4d6d}
-  
-  .popup{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#1a1a2e;border-radius:14px;padding:10px 14px;max-width:340px;width:calc(100% - 28px);box-shadow:0 8px 30px rgba(0,0,0,.7);z-index:20;display:flex;align-items:center;gap:10px;border:1px solid #2a2a3e}
-  .popup img{width:42px;height:42px;border-radius:50%;background:#2a2a3e}
+  .card .dist{position:absolute;top:8px;left:8px;background:rgba(0,0,0,.7);color:#fff;font-size:10px;padding:3px 6px;border-radius:4px;z-index:2}
+
+  .cta-wrap{padding:20px 16px 90px;text-align:center;max-width:520px;margin:0 auto}
+  .cta{display:block;width:100%;padding:18px;background:linear-gradient(135deg,var(--pink),var(--purple));color:#fff;text-decoration:none;border-radius:12px;font-size:19px;font-weight:bold;box-shadow:0 6px 24px rgba(255,45,109,.5);border:none;cursor:pointer;animation:glow 2s infinite}
+  @keyframes glow{0%,100%{box-shadow:0 6px 24px rgba(255,45,109,.5)}50%{box-shadow:0 6px 36px rgba(255,45,109,.85)}}
+  .cta-sub{color:var(--muted);font-size:13px;margin-top:10px}
+  .cta-sub b{color:var(--pink)}
+
+  .ticker{background:#16162a;padding:8px 16px;font-size:12px;color:var(--muted);text-align:center;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .ticker b{color:var(--green)}
+
+  .popup{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--card);border-radius:14px;padding:10px 14px;max-width:340px;width:calc(100% - 28px);box-shadow:0 8px 30px rgba(0,0,0,.7);z-index:20;display:flex;align-items:center;gap:10px;border:1px solid var(--line);animation:slideUp .4s}
+  @keyframes slideUp{from{transform:translate(-50%,80px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
+  .popup img{width:42px;height:42px;border-radius:50%;background:var(--line)}
   .popup .text{flex:1;font-size:13px}
-  .popup .text b{color:#ff4d6d}
+  .popup .text b{color:var(--pink)}
   .popup .text .when{color:#666;font-size:11px;display:block;margin-top:2px}
-  
-  .trust{padding:14px;text-align:center;font-size:11px;color:#555;border-top:1px solid #1a1a2e}
+  .popup .close{color:#666;cursor:pointer;font-size:18px;background:none;border:none;padding:0 4px}
+
+  .sticky-cta{position:fixed;bottom:0;left:0;right:0;background:rgba(10,10,20,.95);backdrop-filter:blur(10px);padding:10px 16px;border-top:1px solid var(--line);z-index:30}
+  .sticky-cta button{width:100%;padding:14px;background:linear-gradient(135deg,var(--pink),var(--purple));color:#fff;border:none;border-radius:10px;font-size:17px;font-weight:bold;cursor:pointer;box-shadow:0 4px 16px rgba(255,45,109,.4)}
+  .sticky-cta .timer{font-size:11px;color:var(--muted);text-align:center;margin-top:4px}
+  .sticky-cta .timer b{color:var(--pink)}
+
+  .trust{padding:14px;text-align:center;font-size:11px;color:#555;border-top:1px solid var(--line)}
   .trust-row{display:flex;justify-content:center;gap:14px;flex-wrap:wrap}
   .trust-row span{color:#888}
-  
-  .legal{text-align:center;padding:12px;font-size:10px;color:#444;border-top:1px solid #1a1a2e}
-  
-  .sticky-cta{position:fixed;bottom:0;left:0;right:0;background:rgba(15,15,26,.95);backdrop-filter:blur(10px);padding:10px 16px;border-top:1px solid #2a2a3e;z-index:30;transform:translateY(100%);transition:transform .3s}
-  .sticky-cta.show{transform:translateY(0)}
-  .sticky-cta button{width:100%;padding:14px;background:linear-gradient(135deg,#ff4d6d 0%,#c2185b 100%);color:#fff;border:none;border-radius:10px;font-size:17px;font-weight:bold;cursor:pointer}
-  
-  @media(min-width:520px){.grid{grid-template-columns:repeat(3,1fr)}.card img{height:170px}}
+
+  .legal{text-align:center;padding:12px;font-size:10px;color:#444;border-top:1px solid var(--line)}
+
+  @media(min-width:520px){.grid{grid-template-columns:repeat(3,1fr)}.card .ph{height:170px}}
 </style>
 </head>
 <body>
 
-<div class="gate" id="gate">
-  <div class="gate-box">
-    <h2>⚠️ Contenuto 18+</h2>
-    <p>Questo sito contiene materiale per adulti. Devi avere almeno 18 anni per continuare.</p>
-    <button class="gate-btn" onclick="document.getElementById('gate').style.display='none'">Ho 18 anni o più →</button>
-    <button class="gate-leave" onclick="window.history.back()">Esci</button>
+<!-- STEP 1: AGE GATE -->
+<div class="step active" id="s1">
+  <div class="s1">
+    <div class="logo">🔥</div>
+    <h1>Incontri Locali</h1>
+    <p>Più di 12.000 donne single nella tua zona cercano compagnia</p>
+    <div class="warning">⚠️ Questo sito contiene materiale per adulti. Accesso riservato a maggiori di 18 anni.</div>
+    <button class="btn" onclick="next(2)">Ho 18 anni o più →</button>
+    <button class="btn-ghost" onclick="window.history.back()">Esci</button>
   </div>
 </div>
 
-<div class="header">
-  <h1>🔥 Incontri nella tua zona</h1>
-  <div class="live"><span class="dot"></span> <span id="online">247</span> donne online ora</div>
-</div>
-
-<div class="ticker"><b>+18 utenti</b> registrati negli ultimi 10 minuti</div>
-
-<div class="counter"><b id="total">1.247</b> donne single a <span id="city">Roma</span> aspettano un messaggio</div>
-
-<div class="grid" id="grid"></div>
-
-<div class="cta-wrap">
-  <button class="cta" onclick="goOffer()">Vedi tutti i profili gratis →</button>
-  <p class="cta-sub">⏰ Offerta gratuita scade tra <b id="timer">15:00</b></p>
-</div>
-
-<div class="trust">
-  <div class="trust-row">
-    <span>✅ 100% privato</span><span>✅ Senza carta</span><span>✅ Gratis oggi</span>
+<!-- STEP 2: LOCATION -->
+<div class="step" id="s2">
+  <div class="s2">
+    <h2>📍 La tua posizione</h2>
+    <div class="sub">Mostrami donne vicino a te</div>
+    <div class="loc-card detected" id="locCard" onclick="next(3)">
+      <div class="loc-ic">📍</div>
+      <div class="loc-info">
+        <div class="loc-name" id="locName">Rilevamento...</div>
+        <div class="loc-meta" id="locMeta">Posizione rilevata automaticamente</div>
+      </div>
+      <span class="loc-badge">DETTAGLI</span>
+    </div>
+    <div class="loc-card" onclick="next(3)">
+      <div class="loc-ic">🏙️</div>
+      <div class="loc-info">
+        <div class="loc-name">Altra città</div>
+        <div class="loc-meta">Scegli manualmente</div>
+      </div>
+    </div>
+    <div class="loc-card" onclick="next(3)">
+      <div class="loc-ic">🌍</div>
+      <div class="loc-info">
+        <div class="loc-name">Tutta Italia</div>
+        <div class="loc-meta">Risultati più ampi</div>
+      </div>
+    </div>
   </div>
 </div>
 
-<div class="popup" id="popup">
-  <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="">
-  <div class="text"><b>Giulia, 26</b> ti ha mandato un messaggio...<span class="when">2 min fa · 1.4 km</span></div>
+<!-- STEP 3: PREFERENCES -->
+<div class="step" id="s3">
+  <div class="s3">
+    <h2>💕 Le tue preferenze</h2>
+    <div class="pref-row">
+      <div class="pref-label">Età delle donne che cerchi</div>
+      <div class="pref-opts" id="ageOpts">
+        <div class="pref-opt sel" data-v="18-25">18-25</div>
+        <div class="pref-opt" data-v="25-35">25-35</div>
+        <div class="pref-opt" data-v="35-45">35-45</div>
+        <div class="pref-opt" data-v="45+">45+</div>
+      </div>
+    </div>
+    <div class="pref-row">
+      <div class="pref-label">Tipo di incontro</div>
+      <div class="pref-opts" id="typeOpts">
+        <div class="pref-opt sel" data-v="casual">Casual</div>
+        <div class="pref-opt" data-v="serious">Serio</div>
+        <div class="pref-opt" data-v="chat">Chat</div>
+      </div>
+    </div>
+    <div class="pref-row">
+      <div class="pref-label">Distanza massima</div>
+      <div class="pref-opts" id="distOpts">
+        <div class="pref-opt" data-v="5">5 km</div>
+        <div class="pref-opt sel" data-v="10">10 km</div>
+        <div class="pref-opt" data-v="25">25 km</div>
+        <div class="pref-opt" data-v="50">50 km</div>
+      </div>
+    </div>
+    <button class="btn" style="margin-top:20px" onclick="startSearch()">Continua →</button>
+  </div>
 </div>
 
-<div class="sticky-cta" id="sticky"><button onclick="goOffer()">Registrati gratis ora →</button></div>
+<!-- STEP 4: LOADING -->
+<div class="step" id="s4">
+  <div class="s4">
+    <div class="loader"></div>
+    <h2>Ricerca in corso...</h2>
+    <div class="status" id="status">Connessione al database...</div>
+    <div class="progress"><div class="progress-bar" id="bar"></div></div>
+  </div>
+</div>
 
-<div class="legal">© 2026 Incontri Locali · Termini · Privacy · 18+<br>Utilizziamo cookie per migliorare l'esperienza.</div>
+<!-- STEP 5: PROFILES REVEAL -->
+<div class="step" id="s5">
+  <div class="header">
+    <h1>🔥 Profili nella tua zona</h1>
+    <div class="live"><span class="dot"></span> <span id="online">247</span> donne online ora</div>
+  </div>
+
+  <div class="ticker"><b>+18 utenti</b> registrati negli ultimi 10 minuti</div>
+
+  <div class="counter"><b id="total">1.247</b> donne single ti aspettano</div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="cta-wrap">
+    <button class="cta" onclick="goOffer()">Sblocca foto e messaggi gratis →</button>
+    <p class="cta-sub">⏰ Offerta gratuita scade tra <b id="timer">15:00</b></p>
+    <p class="cta-sub" style="margin-top:6px">🔒 Solo 3 posti gratuiti rimasti oggi</p>
+  </div>
+
+  <div class="trust">
+    <div class="trust-row">
+      <span>✅ 100% privato</span><span>✅ Senza carta</span><span>✅ Gratis oggi</span>
+    </div>
+  </div>
+
+  <div class="legal">© 2026 Incontri Locali · Termini · Privacy · 18+<br>Utilizziamo cookie per migliorare l'esperienza.</div>
+
+  <div class="popup" id="popup">
+    <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="" onerror="this.src='https://ui-avatars.com/api/?name=G&background=ff2d6d&color=fff&size=80'">
+    <div class="text"><b>Giulia, 26</b> ti ha mandato un messaggio...<span class="when">2 min fa · 1.4 km</span></div>
+    <button class="close" onclick="this.parentElement.style.display='none'">×</button>
+  </div>
+
+  <div class="sticky-cta">
+    <button onclick="goOffer()">Sblocca gratis →</button>
+    <div class="timer">⏰ Offerta scade in <b id="timer2">15:00</b></div>
+  </div>
+</div>
 
 <script>
 var offer='https://tone.affomelody.com/click?pid=20175&offer_id=591&sub1=PRELAND';
 function goOffer(){window.location.href=offer}
+
+function next(n){
+  document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
+  document.getElementById('s'+n).classList.add('active');
+  window.scrollTo(0,0);
+  if(n===4) startSearch();
+  if(n===5) setTimeout(beep,500);
+}
+
+document.querySelectorAll('.pref-opts').forEach(function(opt){
+  opt.addEventListener('click',function(e){
+    if(e.target.classList.contains('pref-opt')){
+      opt.querySelectorAll('.pref-opt').forEach(x=>x.classList.remove('sel'));
+      e.target.classList.add('sel');
+    }
+  });
+});
+
+fetch('https://ipapi.co/json/').then(r=>r.json()).then(d=>{
+  if(d && d.city){
+    document.getElementById('locName').textContent=d.city;
+    document.getElementById('locMeta').textContent=d.region+', '+d.country_name;
+  }else{
+    document.getElementById('locName').textContent='Roma';
+  }
+}).catch(()=>{
+  document.getElementById('locName').textContent='Roma';
+  document.getElementById('locMeta').textContent='Lazio, Italia';
+});
+
+function startSearch(){
+  var steps=['Connessione al database...','Verifica età utenti...','Analisi profili nearby...','Caricamento foto...','Quasi fatto...'];
+  var i=0,p=0;
+  var iv=setInterval(function(){
+    if(i<steps.length){document.getElementById('status').textContent=steps[i];i++}
+    p+=20;
+    document.getElementById('bar').style.width=p+'%';
+    if(p>=100){clearInterval(iv);setTimeout(function(){next(5)},400)}
+  },700);
+}
 
 var profiles=[
   {img:12,name:'Sofia',age:24,dist:'0.8 km',msg:'Ciao 😊'},
@@ -122,37 +289,87 @@ var profiles=[
   {img:38,name:'Elena',age:30,dist:'4.1 km',msg:'Ti aspetto'}
 ];
 
-var h='';
-profiles.forEach(function(p){
-  h+='<div class="card" onclick="goOffer()">'+
-    '<img src="https://randomuser.me/api/portraits/women/'+p.img+'.jpg" alt="'+p.name+'" onerror="this.style.background=\'#2a2a3e\'">'+
-    '<span class="online"></span><span class="dist">'+p.dist+'</span><span class="msg">'+p.msg+'</span>'+
-    '<div class="info"><div class="name">'+p.name+', '+p.age+'</div><div class="meta">🟢 Online · '+p.dist+'</div></div></div>';
-});
-document.getElementById('grid').innerHTML=h;
+function renderProfiles(){
+  var h='';
+  profiles.forEach(function(p){
+    h+='<div class="card" onclick="unlock(this)">'+
+      '<img class="ph" src="https://randomuser.me/api/portraits/women/'+p.img+'.jpg" alt="'+p.name+'" onerror="this.src=\'https://ui-avatars.com/api/?name='+p.name+'&background=a855f7&color=fff&size=200\'">'+
+      '<div class="lock">🔒</div>'+
+      '<span class="online"></span><span class="dist">'+p.dist+'</span><span class="msg">'+p.msg+'</span>'+
+      '<div class="info"><div class="name">'+p.name+', '+p.age+'</div><div class="meta">🟢 Online · '+p.dist+'</div></div></div>';
+  });
+  document.getElementById('grid').innerHTML=h;
+}
+
+function unlock(el){
+  el.classList.add('unlocked');
+  beep();
+  if(document.querySelectorAll('.card.unlocked').length>=3){
+    setTimeout(function(){
+      document.querySelector('.cta').scrollIntoView({behavior:'smooth'});
+      document.getElementById('popup').style.display='flex';
+    },1500);
+  }
+}
+
+renderProfiles();
 
 var mins=15,secs=0;
 setInterval(function(){
   if(secs===0){if(mins>0){mins--;secs=59}}else{secs--}
-  document.getElementById('timer').textContent=mins+':'+(secs<10?'0':'')+secs;
+  var t=mins+':'+(secs<10?'0':'')+secs;
+  if(document.getElementById('timer'))document.getElementById('timer').textContent=t;
+  if(document.getElementById('timer2'))document.getElementById('timer2').textContent=t;
 },1000);
 
-var cities=['Roma','Milano','Napoli','Torino','Bologna','Firenze','Palermo','Bari'];
-var ci=0;
-setInterval(function(){ci=(ci+1)%cities.length;document.getElementById('city').textContent=cities[ci]},3000);
-
 setInterval(function(){
-  var n=240+Math.floor(Math.random()*30);
-  document.getElementById('online').textContent=n;
-  var t=1200+Math.floor(Math.random()*80);
-  document.getElementById('total').textContent=t.toLocaleString('it-IT');
+  if(document.getElementById('online')){
+    document.getElementById('online').textContent=240+Math.floor(Math.random()*30);
+    document.getElementById('total').textContent=(1200+Math.floor(Math.random()*80)).toLocaleString('it-IT');
+  }
 },4000);
 
-setTimeout(function(){document.getElementById('popup').style.display='none'},8000);
+function beep(){
+  try{
+    var ctx=new(window.AudioContext||window.webkitAudioContext)();
+    var osc=ctx.createOscillator();var gain=ctx.createGain();
+    osc.connect(gain);gain.connect(ctx.destination);
+    osc.frequency.value=880;osc.type='sine';
+    gain.gain.setValueAtTime(0.15,ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.3);
+    osc.start();osc.stop(ctx.currentTime+0.3);
+  }catch(e){}
+}
 
-window.addEventListener('scroll',function(){
-  if(window.scrollY>400){document.getElementById('sticky').classList.add('show')}
-});
+if('Notification' in window){
+  setTimeout(function(){
+    Notification.requestPermission().then(p=>{
+      if(p==='granted'){
+        new Notification('Giulia, 26',{body:'Ciao! Ti va di chattare? 😊',icon:'https://randomuser.me/api/portraits/women/44.jpg'});
+      }
+    });
+  },8000);
+}
+
+var popups=[
+  {img:44,name:'Giulia',age:26,dist:'1.4 km',msg:'ti ha mandato un messaggio'},
+  {img:23,name:'Sofia',age:24,dist:'0.8 km',msg:'ti ha visualizzato il profilo'},
+  {img:67,name:'Alessia',age:25,dist:'1.9 km',msg:'vuole conoscerti'},
+  {img:38,name:'Elena',age:30,dist:'4.1 km',msg:'è online ora'}
+];
+var pi=0;
+setInterval(function(){
+  if(!document.getElementById('s5').classList.contains('active'))return;
+  var p=popups[pi%popups.length];pi++;
+  var popup=document.getElementById('popup');
+  if(popup.style.display==='none'||!popup.style.display){
+    popup.querySelector('img').src='https://randomuser.me/api/portraits/women/'+p.img+'.jpg';
+    popup.querySelector('.text').innerHTML='<b>'+p.name+', '+p.age+'</b> '+p.msg+'<span class="when">'+Math.floor(Math.random()*5+1)+' min fa · '+p.dist+'</span>';
+    popup.style.display='flex';
+    beep();
+    setTimeout(function(){popup.style.display='none'},6000);
+  }
+},12000);
 </script>
 
 </body>
