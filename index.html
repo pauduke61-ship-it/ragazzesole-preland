@@ -2,35 +2,158 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Incontri nella tua città</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Incontri nella tua zona</title>
 <style>
-  *{box-sizing:border-box}
-  body{margin:0;font-family:Arial,sans-serif;background:linear-gradient(180deg,#ffe8ec 0%,#fff 100%);text-align:center;padding:24px 16px;min-height:100vh}
-  .wrap{max-width:480px;margin:0 auto}
-  h1{color:#c2185b;font-size:26px;margin:16px 0;line-height:1.3}
-  .sub{color:#666;font-size:15px;margin:8px 0 20px}
-  .profiles{font-size:13px;color:#888;margin:12px 0}
-  .btn{display:block;width:100%;background:#e91e63;color:#fff;padding:18px;border-radius:10px;text-decoration:none;font-size:19px;font-weight:bold;margin:18px 0;box-shadow:0 4px 14px rgba(233,30,99,.35);border:none;cursor:pointer}
-  .btn:active{transform:scale(0.98)}
-  .timer{color:#c2185b;font-weight:bold;font-size:14px;margin-top:16px}
-  .legal{font-size:11px;color:#999;margin-top:24px}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:#0f0f1a;color:#fff;min-height:100vh;overflow-x:hidden}
+  
+  .gate{position:fixed;inset:0;background:rgba(0,0,0,.94);z-index:100;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px}
+  .gate-box{max-width:340px}
+  .gate h2{color:#ff4d6d;font-size:22px;margin-bottom:12px}
+  .gate p{color:#aaa;font-size:14px;margin-bottom:20px}
+  .gate-btn{display:block;width:100%;padding:16px;background:#ff4d6d;color:#fff;border:none;border-radius:8px;font-size:18px;font-weight:bold;cursor:pointer;margin-bottom:8px}
+  .gate-leave{color:#666;background:transparent;font-size:13px;cursor:pointer;border:none;text-decoration:underline}
+  
+  .header{background:linear-gradient(135deg,#ff4d6d 0%,#c2185b 100%);padding:14px 16px;text-align:center;position:sticky;top:0;z-index:10}
+  .header h1{font-size:18px;font-weight:bold}
+  .header .live{display:inline-flex;align-items:center;gap:6px;margin-top:4px;font-size:12px;color:rgba(255,255,255,.9)}
+  .dot{width:8px;height:8px;background:#4ade80;border-radius:50%;animation:pulse 1.5s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+  
+  .ticker{background:#16162a;padding:10px 16px;font-size:12px;color:#666;text-align:center;border-bottom:1px solid #2a2a3e}
+  .ticker b{color:#4ade80}
+  
+  .counter{text-align:center;padding:14px;background:#1a1a2e;font-size:13px;color:#aaa;border-bottom:1px solid #2a2a3e}
+  .counter b{color:#4ade80;font-size:18px}
+  
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:12px;max-width:520px;margin:0 auto}
+  .card{background:#1a1a2e;border-radius:12px;overflow:hidden;position:relative;cursor:pointer;transition:transform .15s}
+  .card:active{transform:scale(0.97)}
+  .card img{width:100%;height:200px;object-fit:cover;display:block;background:#2a2a3e}
+  .card .info{padding:8px 10px}
+  .card .name{font-size:14px;font-weight:bold}
+  .card .meta{font-size:11px;color:#888;margin-top:2px}
+  .card .online{position:absolute;top:8px;right:8px;width:11px;height:11px;background:#4ade80;border-radius:50%;border:2px solid #1a1a2e;box-shadow:0 0 8px #4ade80}
+  .card .msg{position:absolute;bottom:48px;left:8px;background:rgba(255,77,109,.95);color:#fff;font-size:10px;padding:3px 8px;border-radius:10px;animation:bounce 2s infinite;font-weight:bold}
+  @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+  .card .dist{position:absolute;top:8px;left:8px;background:rgba(0,0,0,.65);color:#fff;font-size:10px;padding:3px 6px;border-radius:4px}
+  
+  .cta-wrap{padding:20px 16px 30px;text-align:center;max-width:520px;margin:0 auto}
+  .cta{display:block;width:100%;padding:18px;background:linear-gradient(135deg,#ff4d6d 0%,#c2185b 100%);color:#fff;text-decoration:none;border-radius:12px;font-size:20px;font-weight:bold;box-shadow:0 6px 20px rgba(255,77,109,.5);border:none;cursor:pointer;animation:glow 2s infinite}
+  @keyframes glow{0%,100%{box-shadow:0 6px 20px rgba(255,77,109,.5)}50%{box-shadow:0 6px 32px rgba(255,77,109,.85)}}
+  .cta-sub{color:#888;font-size:13px;margin-top:10px}
+  .cta-sub b{color:#ff4d6d}
+  
+  .popup{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#1a1a2e;border-radius:14px;padding:10px 14px;max-width:340px;width:calc(100% - 28px);box-shadow:0 8px 30px rgba(0,0,0,.7);z-index:20;display:flex;align-items:center;gap:10px;border:1px solid #2a2a3e}
+  .popup img{width:42px;height:42px;border-radius:50%;background:#2a2a3e}
+  .popup .text{flex:1;font-size:13px}
+  .popup .text b{color:#ff4d6d}
+  .popup .text .when{color:#666;font-size:11px;display:block;margin-top:2px}
+  
+  .trust{padding:14px;text-align:center;font-size:11px;color:#555;border-top:1px solid #1a1a2e}
+  .trust-row{display:flex;justify-content:center;gap:14px;flex-wrap:wrap}
+  .trust-row span{color:#888}
+  
+  .legal{text-align:center;padding:12px;font-size:10px;color:#444;border-top:1px solid #1a1a2e}
+  
+  .sticky-cta{position:fixed;bottom:0;left:0;right:0;background:rgba(15,15,26,.95);backdrop-filter:blur(10px);padding:10px 16px;border-top:1px solid #2a2a3e;z-index:30;transform:translateY(100%);transition:transform .3s}
+  .sticky-cta.show{transform:translateY(0)}
+  .sticky-cta button{width:100%;padding:14px;background:linear-gradient(135deg,#ff4d6d 0%,#c2185b 100%);color:#fff;border:none;border-radius:10px;font-size:17px;font-weight:bold;cursor:pointer}
+  
+  @media(min-width:520px){.grid{grid-template-columns:repeat(3,1fr)}.card img{height:170px}}
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <h1>👩 Ragazze vicino a te<br>ti aspettano!</h1>
-    <p class="sub">Oltre 12.000 donne single registrate nella tua zona</p>
-    <p class="profiles">📍 Roma · Milano · Napoli · Torino · Bologna</p>
-    <button class="btn" onclick="window.location.href='https://tone.affomelody.com/click?pid=20175&offer_id=591&sub1=PRELAND'">
-      Vedi i profili gratis →
-    </button>
-    <p class="timer">⚡ Solo oggi: registrazione gratuita</p>
-    <p class="legal">Accettando, confermi di avere almeno 18 anni. Privacy Policy applicabile.</p>
+
+<div class="gate" id="gate">
+  <div class="gate-box">
+    <h2>⚠️ Contenuto 18+</h2>
+    <p>Questo sito contiene materiale per adulti. Devi avere almeno 18 anni per continuare.</p>
+    <button class="gate-btn" onclick="document.getElementById('gate').style.display='none'">Ho 18 anni o più →</button>
+    <button class="gate-leave" onclick="window.history.back()">Esci</button>
   </div>
-  <script>
-    // антибот: блокируем клики без реального interaction
-    document.addEventListener('contextmenu',e=>e.preventDefault());
-  </script>
+</div>
+
+<div class="header">
+  <h1>🔥 Incontri nella tua zona</h1>
+  <div class="live"><span class="dot"></span> <span id="online">247</span> donne online ora</div>
+</div>
+
+<div class="ticker"><b>+18 utenti</b> registrati negli ultimi 10 minuti</div>
+
+<div class="counter"><b id="total">1.247</b> donne single a <span id="city">Roma</span> aspettano un messaggio</div>
+
+<div class="grid" id="grid"></div>
+
+<div class="cta-wrap">
+  <button class="cta" onclick="goOffer()">Vedi tutti i profili gratis →</button>
+  <p class="cta-sub">⏰ Offerta gratuita scade tra <b id="timer">15:00</b></p>
+</div>
+
+<div class="trust">
+  <div class="trust-row">
+    <span>✅ 100% privato</span><span>✅ Senza carta</span><span>✅ Gratis oggi</span>
+  </div>
+</div>
+
+<div class="popup" id="popup">
+  <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="">
+  <div class="text"><b>Giulia, 26</b> ti ha mandato un messaggio...<span class="when">2 min fa · 1.4 km</span></div>
+</div>
+
+<div class="sticky-cta" id="sticky"><button onclick="goOffer()">Registrati gratis ora →</button></div>
+
+<div class="legal">© 2026 Incontri Locali · Termini · Privacy · 18+<br>Utilizziamo cookie per migliorare l'esperienza.</div>
+
+<script>
+var offer='https://tone.affomelody.com/click?pid=20175&offer_id=591&sub1=PRELAND';
+function goOffer(){window.location.href=offer}
+
+var profiles=[
+  {img:12,name:'Sofia',age:24,dist:'0.8 km',msg:'Ciao 😊'},
+  {img:23,name:'Giulia',age:26,dist:'1.4 km',msg:'Nuovo msg'},
+  {img:33,name:'Valentina',age:29,dist:'2.1 km',msg:'Caffè?'},
+  {img:45,name:'Martina',age:23,dist:'0.5 km',msg:'Online'},
+  {img:56,name:'Chiara',age:31,dist:'3.2 km',msg:'Ciao 😘'},
+  {img:67,name:'Alessia',age:25,dist:'1.9 km',msg:'Chatti?'},
+  {img:15,name:'Francesca',age:28,dist:'2.7 km',msg:'Online'},
+  {img:26,name:'Sara',age:22,dist:'0.9 km',msg:'Match!'},
+  {img:38,name:'Elena',age:30,dist:'4.1 km',msg:'Ti aspetto'}
+];
+
+var h='';
+profiles.forEach(function(p){
+  h+='<div class="card" onclick="goOffer()">'+
+    '<img src="https://randomuser.me/api/portraits/women/'+p.img+'.jpg" alt="'+p.name+'" onerror="this.style.background=\'#2a2a3e\'">'+
+    '<span class="online"></span><span class="dist">'+p.dist+'</span><span class="msg">'+p.msg+'</span>'+
+    '<div class="info"><div class="name">'+p.name+', '+p.age+'</div><div class="meta">🟢 Online · '+p.dist+'</div></div></div>';
+});
+document.getElementById('grid').innerHTML=h;
+
+var mins=15,secs=0;
+setInterval(function(){
+  if(secs===0){if(mins>0){mins--;secs=59}}else{secs--}
+  document.getElementById('timer').textContent=mins+':'+(secs<10?'0':'')+secs;
+},1000);
+
+var cities=['Roma','Milano','Napoli','Torino','Bologna','Firenze','Palermo','Bari'];
+var ci=0;
+setInterval(function(){ci=(ci+1)%cities.length;document.getElementById('city').textContent=cities[ci]},3000);
+
+setInterval(function(){
+  var n=240+Math.floor(Math.random()*30);
+  document.getElementById('online').textContent=n;
+  var t=1200+Math.floor(Math.random()*80);
+  document.getElementById('total').textContent=t.toLocaleString('it-IT');
+},4000);
+
+setTimeout(function(){document.getElementById('popup').style.display='none'},8000);
+
+window.addEventListener('scroll',function(){
+  if(window.scrollY>400){document.getElementById('sticky').classList.add('show')}
+});
+</script>
+
 </body>
 </html>
