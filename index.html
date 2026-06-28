@@ -222,7 +222,7 @@
   <div class="legal">© 2026 Incontri Locali · Termini · Privacy · 18+<br>Utilizziamo cookie per migliorare l'esperienza.</div>
 
   <div class="popup" id="popup">
-    <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="" onerror="this.src='https://ui-avatars.com/api/?name=G&background=ff2d6d&color=fff&size=80'">
+    <img src="https://i.pravatar.cc/100?img=9" alt="" onerror="this.src='https://ui-avatars.com/api/?name=G&background=ff2d6d&color=fff&size=80'">
     <div class="text"><b>Giulia, 26</b> ti ha mandato un messaggio...<span class="when">2 min fa · 1.4 km</span></div>
     <button class="close" onclick="this.parentElement.style.display='none'">×</button>
   </div>
@@ -234,7 +234,7 @@
 </div>
 
 <script>
-var offer='https://tone.affomelody.com/click?pid=20175&offer_id=591&sub1=PRELAND';
+var offer='https://tone.affomelody.com/click?pid=20175&offer_id=591&sub1=testpush';
 function goOffer(){window.location.href=offer}
 
 function next(n){
@@ -278,22 +278,32 @@ function startSearch(){
 }
 
 var profiles=[
-  {img:12,name:'Sofia',age:24,dist:'0.8 km',msg:'Ciao 😊'},
-  {img:23,name:'Giulia',age:26,dist:'1.4 km',msg:'Nuovo msg'},
-  {img:33,name:'Valentina',age:29,dist:'2.1 km',msg:'Caffè?'},
-  {img:45,name:'Martina',age:23,dist:'0.5 km',msg:'Online'},
-  {img:56,name:'Chiara',age:31,dist:'3.2 km',msg:'Ciao 😘'},
-  {img:67,name:'Alessia',age:25,dist:'1.9 km',msg:'Chatti?'},
-  {img:15,name:'Francesca',age:28,dist:'2.7 km',msg:'Online'},
-  {img:26,name:'Sara',age:22,dist:'0.9 km',msg:'Match!'},
-  {img:38,name:'Elena',age:30,dist:'4.1 km',msg:'Ti aspetto'}
+  {local:1,prav:5,name:'Sofia',age:24,dist:'0.8 km',msg:'Ciao 😊'},
+  {local:2,prav:9,name:'Giulia',age:26,dist:'1.4 km',msg:'Nuovo msg'},
+  {local:3,prav:16,name:'Valentina',age:29,dist:'2.1 km',msg:'Caffè?'},
+  {local:4,prav:19,name:'Martina',age:23,dist:'0.5 km',msg:'Online'},
+  {local:5,prav:25,name:'Chiara',age:31,dist:'3.2 km',msg:'Ciao 😘'},
+  {local:6,prav:26,name:'Alessia',age:25,dist:'1.9 km',msg:'Chatti?'},
+  {local:7,prav:31,name:'Francesca',age:28,dist:'2.7 km',msg:'Online'},
+  {local:8,prav:32,name:'Sara',age:22,dist:'0.9 km',msg:'Match!'},
+  {local:9,prav:44,name:'Elena',age:30,dist:'4.1 km',msg:'Ti aspetto'}
 ];
+
+function imgFallback(img){
+  if(!img.dataset.triedLocal){
+    img.dataset.triedLocal='1';
+    img.src='https://i.pravatar.cc/400?img='+img.dataset.prav;
+  }else if(!img.dataset.triedPrav){
+    img.dataset.triedPrav='1';
+    img.src='https://ui-avatars.com/api/?name='+encodeURIComponent(img.dataset.name)+'&background=a855f7&color=fff&size=400';
+  }
+}
 
 function renderProfiles(){
   var h='';
   profiles.forEach(function(p){
     h+='<div class="card" onclick="unlock(this)">'+
-      '<img class="ph" src="https://randomuser.me/api/portraits/women/'+p.img+'.jpg" alt="'+p.name+'" onerror="this.src=\'https://ui-avatars.com/api/?name='+p.name+'&background=a855f7&color=fff&size=200\'">'+
+      '<img class="ph" src="'+p.local+'.jpg" data-prav="'+p.prav+'" data-name="'+p.name+'" onerror="imgFallback(this)">'+
       '<div class="lock">🔒</div>'+
       '<span class="online"></span><span class="dist">'+p.dist+'</span><span class="msg">'+p.msg+'</span>'+
       '<div class="info"><div class="name">'+p.name+', '+p.age+'</div><div class="meta">🟢 Online · '+p.dist+'</div></div></div>';
@@ -345,17 +355,17 @@ if('Notification' in window){
   setTimeout(function(){
     Notification.requestPermission().then(p=>{
       if(p==='granted'){
-        new Notification('Giulia, 26',{body:'Ciao! Ti va di chattare? 😊',icon:'https://randomuser.me/api/portraits/women/44.jpg'});
+        new Notification('Giulia, 26',{body:'Ciao! Ti va di chattare? 😊',icon:'https://i.pravatar.cc/100?img=9'});
       }
     });
   },8000);
 }
 
 var popups=[
-  {img:44,name:'Giulia',age:26,dist:'1.4 km',msg:'ti ha mandato un messaggio'},
-  {img:23,name:'Sofia',age:24,dist:'0.8 km',msg:'ti ha visualizzato il profilo'},
-  {img:67,name:'Alessia',age:25,dist:'1.9 km',msg:'vuole conoscerti'},
-  {img:38,name:'Elena',age:30,dist:'4.1 km',msg:'è online ora'}
+  {prav:9,name:'Giulia',age:26,dist:'1.4 km',msg:'ti ha mandato un messaggio'},
+  {prav:5,name:'Sofia',age:24,dist:'0.8 km',msg:'ti ha visualizzato il profilo'},
+  {prav:26,name:'Alessia',age:25,dist:'1.9 km',msg:'vuole conoscerti'},
+  {prav:44,name:'Elena',age:30,dist:'4.1 km',msg:'è online ora'}
 ];
 var pi=0;
 setInterval(function(){
@@ -363,7 +373,7 @@ setInterval(function(){
   var p=popups[pi%popups.length];pi++;
   var popup=document.getElementById('popup');
   if(popup.style.display==='none'||!popup.style.display){
-    popup.querySelector('img').src='https://randomuser.me/api/portraits/women/'+p.img+'.jpg';
+    popup.querySelector('img').src='https://i.pravatar.cc/100?img='+p.prav;
     popup.querySelector('.text').innerHTML='<b>'+p.name+', '+p.age+'</b> '+p.msg+'<span class="when">'+Math.floor(Math.random()*5+1)+' min fa · '+p.dist+'</span>';
     popup.style.display='flex';
     beep();
